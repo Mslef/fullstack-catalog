@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block title %}{{category.name}} - New Item{% endblock %}
+
+{% block content %}
+<form action="{{url_for('newItem', category_id=category.id)}}" method="post">
+    <h2 class="category-name">{{category.name}}</h2>
+    <label>Enter the item's name :</label><br>
+    <input type="text" size="50" name="name">
+    <hr>
+    <label>Enter the item's description :</label><br>
+    <textarea type="text" cols="80" rows="10" name="description"></textarea>
+    <hr>
+    <label>Enter the item's image url :</label><br>
+    <input type="text" size="50" name="url">
+    <hr>
+    <button type="submit" value="Create">Create Item</button>
+    <hr>
+</form>
+    <a href="{{url_for('showCategory', category_id = category.id)}}"><button>Back</button></a>
+{% endblock %}

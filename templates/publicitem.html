@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block title %}{{item.name}}{% endblock %}
+
+{% block content %}
+    <h1 class="item-title">{{item.name}}</h1>
+    <hr>
+    <p class="item-description">{{item.description}}</p>
+    <img class="item-image" src="{{item.image_url}}" alt="{{item.name}}">
+
+    <a href="{{url_for('showCategory', category_id = item.category_id)}}"><button>Back</button></a>
+{% endblock %}

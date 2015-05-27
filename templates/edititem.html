@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block title %}{{item.name}}{% endblock %}
+
+{% block content %}
+    <form action="{{url_for('editItem', category_id=item.category_id, item_id=item.id)}}" method="post">
+        <label>Change the item's name :</label><br>
+        <input type="text" size="50" name="name" value="{{item.name}}">
+        <hr>
+        <label>Change the item's description :</label><br>
+        <textarea type="text" cols="80" rows="10" name="description">{{item.description}}</textarea>
+        <hr>
+        <label>Change the item's image url :</label><br>
+        <input type="text" size="50" name="url" value="{{item.image_url}}">
+        <hr>
+        <button type="submit" value="Create">Update Item</button>
+        <hr>
+    </form>
+    <a href="{{url_for('showCategory', category_id = item.category_id)}}"><button>Back</button></a>
+    <a href="{{url_for('deleteItem', category_id = item.category_id, item_id = item.id)}}"><button>Delete Item</button></a>
+{% endblock %}

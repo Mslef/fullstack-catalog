@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block title %}{{category.name}}{% endblock %}
+
+{% block content %}
+    <form action="{{url_for('editCategory', category_id = category.id)}}" method="post">
+        <label>Change the category's name :</label>
+        <input type="text" size="80" name="name" value="{{category.name}}">
+        <button type="submit" value="Create">Update category</button>
+    </form>
+{% endblock %}

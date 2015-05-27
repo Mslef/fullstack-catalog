@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block title %}Categories{% endblock %}
+
+{% block content %}
+    <h1>List of all categories</h1>
+    <p>The following categories group usefull tools for Udacity students. All the tools listed here are tools that I got to find more about while studying for the Front-End and Full-Stack Web Development nanodegrees. Hope it helps others!</p>
+
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class="messages">
+    {% for message in messages %}
+      <li><strong>{{message}}</strong></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+{% endwith %}
+
+    <hr class="category-ruler">
+    <div class="category-list">
+        {% for cat in category %}
+        <a href="{{url_for('showCategory', category_id=cat.id)}}">
+        <div class="entry">
+            <span class="entry-name">{{cat.name}}</span>
+        </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <h2>recent items</h2>
+{% endblock %}

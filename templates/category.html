@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block title %}{{category.name}}{% endblock %}
+
+{% block content %}
+    <h1>{{category.name}}</h1>
+    <!--MESSAGE FLASHING EXAMPLE -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+
+    <ul>
+    {% for message in messages %}
+      <li><strong>{{message}}</strong></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    {% for x in items %}
+    <div class="entry">
+        <a href="{{url_for('showItem', category_id=category.id, item_id = x.id)}}">{{x.name}}</a>
+        <div class="entry-buttons">
+            <a href="{{url_for('editItem', category_id = category.id, item_id = x.id)}}"><button>Edit</button></a>
+            <a href="{{url_for('deleteItem', category_id = category.id, item_id = x.id)}}"><button>Delete</button></a>
+        </div>
+    </div>
+    {% endfor %}
+    <a href="{{url_for('newItem', category_id = category.id)}}"><button>Create new item</button></a>
+{% endblock %}

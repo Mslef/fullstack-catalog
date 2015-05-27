@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+    <head>
+        {% block head %}
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        <link href="http://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet" type="text/css">       <title>{% block title %}{% endblock %}</title>
+        {% endblock %}
+    </head>
+<body>
+    <div class="parallax">
+        <div class="parallax_group">
+            <div class="parallax_layer parallax_layer_back"><img class="header-background" src="/static/images/hi-tech-wallpapers.jpg" alt="hi tech background image"></div>
+            <div class="parallax_layer parallax_layer_base">
+                <header>
+                    {% block header %}
+                        <a href="{{url_for('categoryList')}}"><h1 class="main-header ">Web Development Tools</h1></a>
+                    <div class="nav-items">
+                      {{if }}
+                        <a href="{{url_for('showLogin')}}"><button class="login">Login</button></a>
+                      {{else}}
+                      {{endif}}
+                    </div>
+                    {% endblock %}
+                </header>
+                <div class="main-background">
+                    <div id="content">{% block content %}{% endblock %}</div>
+                    <footer id="footer">
+                        {% block footer %}
+                        Created by <a href="http://mslef.github.io/">Marcel Lefebvre</a>.
+                        {% endblock %}
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
