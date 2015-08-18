@@ -18,10 +18,19 @@
                         <a href="{{url_for('categoryList')}}"><h1 class="main-header ">Web Development Tools</h1></a>
                     <div class="nav-items">
                       {{if }}
-                        <a href="{{url_for('showLogin')}}"><button class="login">Login</button></a>
+                        <a href="{{url_for('showLogin')}}"></a>
                       {{else}}
                       {{endif}}
                     </div>
+                    {%if 'username' not in session %}
+                      <a href="{{url_for('showLogin')}}">
+                        <button class="login">Login</button>
+                      </a>
+                    {% else %}
+                      <a href="{{url_for('disconnect')}}">
+                        <button class="login">Logout</button>
+                      </a>
+                    {% endif %}
                     {% endblock %}
                 </header>
                 <div class="main-background">
