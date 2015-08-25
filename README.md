@@ -1,6 +1,6 @@
 # fullstack-catalog
 
-Catalog app for the project 3 of the Udacity Full Stack Nanodegree. 
+Catalog app for the project 3 of the Udacity Full Stack Nanodegree. It consists of a wiki for web development ressources, that can be modified if correctly logged in using Oauth.
 
 ##Dependencies
 
