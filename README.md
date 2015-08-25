@@ -4,7 +4,12 @@ Catalog app for the project 3 of the Udacity Full Stack Nanodegree. It consists 
 
 ##Dependencies
 
-To run, you need to have flask and sqlalchemy installed.
+To run, you need to have the following python module installed : 
+* flask
+* oauth2client 
+* sqlalchemy
+
+You can install all of them using pip (pip install [package-name]).
 
 ##How to run
 
