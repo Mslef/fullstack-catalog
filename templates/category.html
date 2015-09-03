@@ -16,7 +16,9 @@
     {% endwith %}
     {% for x in items %}
     <div class="entry">
-        <a href="{{url_for('showItem', category_id=category.id, item_id = x.id)}}">{{x.name}}</a>
+	<a href="{{url_for('showItem', category_id=category.id, item_id = x.id)}}">
+		    {{x.name}}
+	    </a>
         <div class="entry-buttons">
             <a href="{{url_for('editItem', category_id = category.id, item_id = x.id)}}"><button>Edit</button></a>
             <a href="{{url_for('deleteItem', category_id = category.id, item_id = x.id)}}"><button>Delete</button></a>

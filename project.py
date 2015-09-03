@@ -35,6 +35,7 @@ def showCategory(category_id):
     items = session.query(Item).filter_by(category_id=category.id)
     return render_template('category.html', category = category, items = items)
 
+
 @app.route('/categories/<int:category_id>/<int:item_id>')
 def showItem(category_id, item_id):
     item = session.query(Item).filter_by(category_id=category_id, id=item_id).one()
@@ -70,8 +71,9 @@ def createUser(login_session):
     return user.id
 
 def getUserInfo(user_id):
-    user=session.query(User).filter_by(id = user_id).one()
-    return user
+    '''user=session.query(User).filter_by(id = user_id).one()
+    return user'''
+    pass
 
 def getUserID(email):
     try:
@@ -325,11 +327,11 @@ def fbconnect():
     print "access token received %s " % access_token
 
     app_id = json.loads(open('fb_client_secrets.json', 'r').read())[
-        'web']['app_id']
+            'web']['app_id']
     app_secret = json.loads(
-        open('fb_client_secrets.json', 'r').read())['web']['app_secret']
+            open('fb_client_secrets.json', 'r').read())['web']['app_secret']
     url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s' % (
-        app_id, app_secret, access_token)
+            app_id, app_secret, access_token)
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
 
