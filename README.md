@@ -8,8 +8,11 @@ To run, you need to have the following python module installed :
 * flask
 * oauth2client 
 * sqlalchemy
+* requests
 
 You can install all of them using pip (pip install [package-name]).
+
+You will also need to have postgresql installed.
 
 ##How to run
 
