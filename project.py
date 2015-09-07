@@ -317,12 +317,13 @@ def fbconnect():
     # strip expire tag from access token
     token = result.split("&")[0]
 
-    # Get user picture
-    #TODO: Debug this
-    data = get_user_data('https://graph.facebook.com/v2.2/me/picture?%s&redirect=0&height=200&width=200', token)
-    login_session['picture'] = data["data"]["url"]
-
-    data = get_user_data('https://graph.facebook.com/v2.2/me?%s', token)
+    #data = get_user_data('https://graph.facebook.com/v2.2/me?%s', token)
+    url = 'https://graph.facebook.com/v2.2/me?%s' % token
+    h = httplib2.Http()
+    result = h.request(url, 'GET')[1]
+    print "url sent for API access:%s"% url
+    print "API JSON result: %s" % result
+    data = json.loads(result)
 
     login_session['provider'] = 'facebook'
     login_session['facebook_id'] = data["id"]
@@ -332,6 +333,11 @@ def fbconnect():
     # The token must be stored in the login_session in order to properly logout, let's strip out the information before the equals sign in our token
     stored_token = token.split("=")[1]
     login_session['access_token'] = stored_token
+
+    # Get user picture
+    #TODO: Debug this
+    data = get_user_data('https://graph.facebook.com/v2.2/me/picture?%s&redirect=0&height=200&width=200', token)
+    login_session['picture'] = data["data"]["url"]
 
     return successfull_login(login_session)
 
@@ -368,7 +374,7 @@ def disconnect():
         if login_session['provider'] == 'google':
             gdisconnect()
             del login_session['gplus_id']
-            del login_session['credentials']
+            del login_session['access_token']
         if login_session['provider'] == 'facebook':
             fbdisconnect()
             del login_session['facebook_id']
@@ -378,12 +384,10 @@ def disconnect():
         del login_session['user_id']
         del login_session['provider']
         flash("You have successfully been logged out.")
-        return redirect(url_for('showRestaurants'))
+        return redirect('/')
     else:
         flash("You were not logged in")
-        return redirect(url_for('showRestaurants'))
-
-
+        return redirect('/')
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
