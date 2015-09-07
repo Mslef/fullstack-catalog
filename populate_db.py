@@ -12,13 +12,13 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 def createCategory(name):
-    category = Category(name = name, user_id = 1)
+    category = Category(name = name, user_id = "joe@example.com")
     session.add(category)
     session.commit()
     return category
 
 def createItem(name, description, image_url, category):
-    item = Item(name = name, description = description, image_url=image_url, category = category, user_id = 1)
+    item = Item(name = name, description = description, image_url=image_url, category = category, user_id = "joe@example.com")
 
     session.add(item)
     session.commit()
@@ -27,6 +27,8 @@ def createAdmin(name, email):
     user = User(name = name, email = email, admin = True)
     session.add(user)
     session.commit()
+
+createAdmin("Joe", "joe@example.com")
 
 #Categories
 category1 = createCategory("Javascript Front End Frameworks")

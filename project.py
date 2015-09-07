@@ -40,7 +40,6 @@ def categoryList():
 def showCategory(category_id):
     logged_in = check_login_status();
     category = session.query(Category).filter_by(id=category_id).one()
-    creator = getUserInfo(category.user_id)
     items = session.query(Item).filter_by(category_id=category.id)
     return render_template('category.html', category = category, items = items, logged_in = logged_in)
 
@@ -48,7 +47,6 @@ def showCategory(category_id):
 def showItem(category_id, item_id):
     logged_in = check_login_status();
     item = session.query(Item).filter_by(category_id=category_id, id=item_id).one()
-    creator = getUserInfo(item.user_id)
     return render_template('item.html', item = item, logged_in = logged_in)
 
 # Routes for JSON endpoints
@@ -76,10 +74,15 @@ def createUser(login_session, admin):
     user = session.query(User).filter_by(email=login_session['email']).one()
     return user.email
 
-def getUserInfo(user_id):
-    '''user=session.query(User).filter_by(id = user_id).one()
-    return user'''
-    pass
+def getUserInfoFromCat(id):
+    category = session.query(Category).filter_by(id = id).one()
+    user=session.query(User).filter_by(email = category.user_id).one()
+    return user
+
+def getUserInfoFromItem(id):
+    item = session.query(Item).filter_by(id = id).one()
+    user=session.query(User).filter_by(email = item.user_id).one()
+    return user
 
 def getUserID(email):
     try:
@@ -106,13 +109,13 @@ def newCategory():
 
 @app.route('/categories/<int:category_id>/edit/', methods=['GET', 'POST'])
 def editCategory(category_id):
-    creator = getUserInfo(category_id)
+    creator = getUserInfoFromCat(category_id)
 
     if 'username' not in login_session:
         flash("Please login to edit a Category")
         return redirect('/login')
 
-    if login_session["email"] == creator.email or login_session["admin"] == True:
+    if login_session["email"] == creator.email or creator.admin == True:
         category = session.query(Category).filter_by(id=category_id).one()
         if request.method == 'POST':
             category.name = request.form['name']
@@ -128,11 +131,13 @@ def editCategory(category_id):
 
 @app.route('/categories/<int:category_id>/delete/', methods=['GET', 'POST'])
 def deleteCategory(category_id):
+    creator = getUserInfoFromCat(category_id)
+
     if 'username' not in login_session:
         flash("Please login to delete a Category")
         return redirect('/login')
 
-    if login_session["email"] == creator.email or login_session["admin"] == True:
+    if login_session["email"] == creator.email or creator.admin == True:
         category = session.query(Category).filter_by(id=category_id).one()
         if request.method == 'POST':
             session.delete(category)
@@ -168,7 +173,7 @@ def newItem(category_id):
 
 @app.route('/categories/<int:category_id>/<int:item_id>/edit/', methods=['GET', 'POST'])
 def editItem(category_id, item_id):
-    creator = getUserInfo(category_id)
+    creator = getUserInfoFromItem(item_id)
 
     if 'username' not in login_session:
         flash("Please login to edit an item")
@@ -192,7 +197,7 @@ def editItem(category_id, item_id):
 
 @app.route('/categories/<int:category_id>/<int:item_id>/delete/', methods=['GET', 'POST'])
 def deleteItem(category_id, item_id):
-    creator = getUserInfo(category_id)
+    creator = getUserInfoFromItem(item_id)
 
     if 'username' not in login_session:
         flash("Please login to delete an item")

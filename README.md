@@ -4,9 +4,9 @@ Catalog app for the project 3 of the Udacity Full Stack Nanodegree. It consists 
 
 ##Dependencies
 
-To run, you need to have the following python module installed : 
+To run, you need to have the following python module installed :
 * flask
-* oauth2client 
+* oauth2client
 * sqlalchemy
 * requests
 
@@ -16,4 +16,10 @@ You will also need to have postgresql installed.
 
 ##How to run
 
-Run the command python project.py from the root folder, and the app should run on localhost:5555.
+You have to initialize the db first, with the command python db_setup.py. You then have to populate it using python populate_db.py.
+
+To get the app on localhost, run the command python project.py from the root folder, and the app should run on localhost:5001.
+
+##How the app works
+
+Simply browse the catalog or sign in to create, edit or delete your entries.
