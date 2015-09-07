@@ -21,7 +21,7 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
-
+#helper function to validate login status
 def check_login_status() :
     if 'username' not in login_session:
         return False
@@ -40,7 +40,8 @@ def categoryList():
 def showCategory(category_id):
     logged_in = check_login_status();
     category = session.query(Category).filter_by(id=category_id).one()
-    items = session.query(Item).filter_by(category_id=category.id)
+    #TODO : check if category returns something, if not return 404
+    items = category.items
     return render_template('category.html', category = category, items = items, logged_in = logged_in)
 
 @app.route('/categories/<int:category_id>/<int:item_id>')
@@ -70,23 +71,23 @@ def JSONShowItem(category_id, item_id):
 def createUser(login_session, admin):
     newUser = User(name = login_session['username'], email = login_session['email'], picture = login_session['picture'], admin = admin)
     session.add(newUser)
-    session.commit
+    session.commit()
     user = session.query(User).filter_by(email=login_session['email']).one()
     return user.email
 
 def getUserInfoFromCat(id):
     category = session.query(Category).filter_by(id = id).one()
-    user=session.query(User).filter_by(email = category.user_id).one()
+    user=category.user
     return user
 
 def getUserInfoFromItem(id):
     item = session.query(Item).filter_by(id = id).one()
-    user=session.query(User).filter_by(email = item.user_id).one()
+    user=item.user
     return user
 
 def getUserID(email):
     try:
-        user = session.query(User).filter_by(email=email)
+        user = session.query(User).filter_by(email=email).one()
         return user.id
     except:
         return None
@@ -95,7 +96,7 @@ def getUserID(email):
 #Categories
 @app.route('/categories/new/', methods=['GET', 'POST'])
 def newCategory():
-    if 'username' not in login_session:
+    if not check_login_status() :
         flash("Please login to create a new Category")
         return redirect('/login')
     if request.method == 'POST':
@@ -111,11 +112,11 @@ def newCategory():
 def editCategory(category_id):
     creator = getUserInfoFromCat(category_id)
 
-    if 'username' not in login_session:
+    if not check_login_status() :
         flash("Please login to edit a Category")
         return redirect('/login')
 
-    if login_session["email"] == creator.email or creator.admin == True:
+    if login_session["email"] == creator.email:
         category = session.query(Category).filter_by(id=category_id).one()
         if request.method == 'POST':
             category.name = request.form['name']
@@ -133,15 +134,15 @@ def editCategory(category_id):
 def deleteCategory(category_id):
     creator = getUserInfoFromCat(category_id)
 
-    if 'username' not in login_session:
+    if not check_login_status() :
         flash("Please login to delete a Category")
         return redirect('/login')
 
-    if login_session["email"] == creator.email or creator.admin == True:
+    if login_session["email"] == creator.email:
         category = session.query(Category).filter_by(id=category_id).one()
         if request.method == 'POST':
             session.delete(category)
-            session.commit
+            session.commit()
             flash(category.name + " successfully deleted")
             return redirect('/categories')
 
@@ -157,7 +158,7 @@ def deleteCategory(category_id):
 @app.route('/categories/<int:category_id>/new/', methods=['GET', 'POST'])
 def newItem(category_id):
 
-    if 'username' not in login_session:
+    if not check_login_status():
         flash("Please login to create a new item")
         return redirect('/login')
 
@@ -175,7 +176,7 @@ def newItem(category_id):
 def editItem(category_id, item_id):
     creator = getUserInfoFromItem(item_id)
 
-    if 'username' not in login_session:
+    if not check_login_status() :
         flash("Please login to edit an item")
         return redirect('/login')
 
@@ -199,7 +200,7 @@ def editItem(category_id, item_id):
 def deleteItem(category_id, item_id):
     creator = getUserInfoFromItem(item_id)
 
-    if 'username' not in login_session:
+    if not check_login_status() :
         flash("Please login to delete an item")
         return redirect('/login')
 
@@ -242,10 +243,10 @@ def successfull_login(login_session):
     '''Function to create a new User and output a welcome message'''
 
     # Check if user exists
-    user_id = getUserID(login_session['email'])
-    if not user_id:
+    user = session.query(User).filter_by(email=login_session['email']).one()
+    if user == "":
         user_id = createUser(login_session, False)
-    login_session['user_id'] = user_id
+    login_session['user_id'] = login_session['email']
 
     # Output a welcome message
     output = "<h1> Welcome, %s !</h1>" % login_session['username']
@@ -410,6 +411,6 @@ def disconnect():
         return redirect('/')
 
 if __name__ == '__main__':
-    app.secret_key = 'super_secret_key'
+    app.secret_key = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
     app.debug = True
     app.run(host = '0.0.0.0', port = 5001)

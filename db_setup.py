@@ -43,7 +43,7 @@ class Item(Base):
     description = Column(Unicode(250))
     image_url = Column(String(250))
     category_id = Column(Integer, ForeignKey('category.id'))
-    category = relationship(Category)
+    category = relationship(Category, backref='items')
     user_id = Column(String(250), ForeignKey('user.email'))
     user = relationship(User)
 
@@ -54,7 +54,7 @@ class Item(Base):
             'name': self.name,
             'id': self.id,
             'description': self.description,
-            'image url': self.image_url
+            'image_url': self.image_url
         }
 
 engine = create_engine('sqlite:///catalog.db')
