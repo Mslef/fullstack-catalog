@@ -23,6 +23,10 @@ def createItem(name, description, image_url, category):
     session.add(item)
     session.commit()
 
+def createUser(name):
+    user = User(name = name)
+    session.add(user)
+    session.commit()
 
 #Categories
 category1 = createCategory("Javascript Front End Frameworks")

@@ -21,6 +21,7 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+
 #Basic routes to display all categories, a category and an item
 @app.route('/')
 @app.route('/categories/')
@@ -35,14 +36,11 @@ def showCategory(category_id):
     items = session.query(Item).filter_by(category_id=category.id)
     return render_template('category.html', category = category, items = items)
 
-
 @app.route('/categories/<int:category_id>/<int:item_id>')
 def showItem(category_id, item_id):
     item = session.query(Item).filter_by(category_id=category_id, id=item_id).one()
     creator = getUserInfo(item.user_id)
     return render_template('item.html', item = item)
-
-
 
 # Routes for JSON endpoints
 @app.route('/categories/<int:category_id>/JSON')
@@ -60,7 +58,6 @@ def JSONCategoryList():
 def JSONShowItem(category_id, item_id):
     item = session.query(Item).filter_by(category_id=category_id, id=item_id).one()
     return jsonify(Item=[item.serialize])
-
 
 #User methods
 def createUser(login_session):
@@ -200,6 +197,7 @@ def deleteItem(category_id, item_id):
 #Login page
 @app.route('/login')
 def showLogin():
+    #create state to protect against Cross-Site Forgery Attacks
     state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
     login_session['state'] = state
     return render_template('login.html', STATE=state)
