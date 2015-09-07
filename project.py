@@ -22,25 +22,34 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 
+def check_login_status() :
+    if 'username' not in login_session:
+        return False
+    else :
+        return True
+
 #Basic routes to display all categories, a category and an item
 @app.route('/')
 @app.route('/categories/')
 def categoryList():
     category = session.query(Category).all()
-    return render_template('index.html', category = category)
+    logged_in = check_login_status();
+    return render_template('index.html', category = category, logged_in = logged_in)
 
 @app.route('/categories/<int:category_id>/')
 def showCategory(category_id):
+    logged_in = check_login_status();
     category = session.query(Category).filter_by(id=category_id).one()
     creator = getUserInfo(category.user_id)
     items = session.query(Item).filter_by(category_id=category.id)
-    return render_template('category.html', category = category, items = items)
+    return render_template('category.html', category = category, items = items, logged_in = logged_in)
 
 @app.route('/categories/<int:category_id>/<int:item_id>')
 def showItem(category_id, item_id):
+    logged_in = check_login_status();
     item = session.query(Item).filter_by(category_id=category_id, id=item_id).one()
     creator = getUserInfo(item.user_id)
-    return render_template('item.html', item = item)
+    return render_template('item.html', item = item, logged_in = logged_in)
 
 # Routes for JSON endpoints
 @app.route('/categories/<int:category_id>/JSON')
@@ -100,6 +109,7 @@ def editCategory(category_id):
     creator = getUserInfo(category_id)
 
     if 'username' not in login_session:
+        flash("Please login to edit a Category")
         return redirect('/login')
 
     if login_session["email"] == creator.email or login_session["admin"] == True:
@@ -119,6 +129,7 @@ def editCategory(category_id):
 @app.route('/categories/<int:category_id>/delete/', methods=['GET', 'POST'])
 def deleteCategory(category_id):
     if 'username' not in login_session:
+        flash("Please login to delete a Category")
         return redirect('/login')
 
     if login_session["email"] == creator.email or login_session["admin"] == True:
@@ -160,12 +171,14 @@ def editItem(category_id, item_id):
     creator = getUserInfo(category_id)
 
     if 'username' not in login_session:
+        flash("Please login to edit an item")
         return redirect('/login')
 
     if login_session["email"] != creator.email:
         flash("You don't have the permission to edit this item")
         return redirect(url_for('showCategory', category_id = category_id))
 
+    #Get the item
     item = session.query(Item).filter_by(category_id=category_id, id=item_id).one()
     if request.method == 'POST':
         item.name = request.form['name']
@@ -182,6 +195,7 @@ def deleteItem(category_id, item_id):
     creator = getUserInfo(category_id)
 
     if 'username' not in login_session:
+        flash("Please login to delete an item")
         return redirect('/login')
 
     if login_session["email"] != creator.email:
@@ -200,10 +214,11 @@ def deleteItem(category_id, item_id):
 #Login page
 @app.route('/login')
 def showLogin():
+    logged_in = check_login_status();
     #create state to protect against Cross-Site Forgery Attacks
     state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
     login_session['state'] = state
-    return render_template('login.html', STATE=state)
+    return render_template('login.html', STATE=state, logged_in = logged_in)
 
 #helper functions
 def return_response(response_string, response_code):

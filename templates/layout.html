@@ -22,7 +22,7 @@
                       {{else}}
                       {{endif}}
                     </div>
-                    {%if 'username' not in session %}
+                    {% if logged_in == False %}
                       <a href="{{url_for('showLogin')}}">
                         <button class="login">Login</button>
                       </a>

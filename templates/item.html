@@ -8,6 +8,8 @@
     <img class="item-image" src="{{item.image_url}}" alt="{{item.name}}">
 
     <a href="{{url_for('showCategory', category_id = item.category_id)}}"><button>Back</button></a>
+    {% if logged_in == True %}
     <a href="{{url_for('editItem', category_id =item.category_id, item_id = item.id)}}"><button>Edit</button></a>
     <a href="{{url_for('deleteItem', category_id = item.category_id, item_id = item.id)}}"><button>Delete</button></a>
+    {% endif %}
 {% endblock %}

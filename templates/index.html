@@ -15,18 +15,21 @@
     </ul>
     {% endif %}
 {% endwith %}
-
+    {% if logged_in == True %}
     <a href="{{url_for('newCategory')}}"><button>Create a new category</button></a>
+    {% endif %}
     <hr class="category-ruler">
     <div class="category-list">
         {% for cat in category %}
         <a href="{{url_for('showCategory', category_id=cat.id)}}">
         <div class="entry">
             <span class="entry-name">{{cat.name}}</span>
+            {% if logged_in == True %}
             <div class="entry-buttons">
                 <a href="{{url_for('editCategory', category_id = cat.id)}}"><button>Edit</button></a>
                 <a href="{{url_for('deleteCategory', category_id = cat.id)}}"><button>Delete</button></a>
             </div>
+            {% endif %}
         </div>
         </a>
         {% endfor %}

@@ -16,14 +16,18 @@
     {% endwith %}
     {% for x in items %}
     <div class="entry">
-	<a href="{{url_for('showItem', category_id=category.id, item_id = x.id)}}">
+	     <a href="{{url_for('showItem', category_id=category.id, item_id = x.id)}}">
 		    {{x.name}}
-	    </a>
+	     </a>
+      {% if logged_in == True %}
         <div class="entry-buttons">
             <a href="{{url_for('editItem', category_id = category.id, item_id = x.id)}}"><button>Edit</button></a>
             <a href="{{url_for('deleteItem', category_id = category.id, item_id = x.id)}}"><button>Delete</button></a>
         </div>
+        {% endif %}
     </div>
     {% endfor %}
+    {% if logged_in == True %}
     <a href="{{url_for('newItem', category_id = category.id)}}"><button>Create new item</button></a>
+    {% endif %}
 {% endblock %}

@@ -19,6 +19,7 @@
 </ul>
 {% endif %}
 {% endwith %}
+{% if logged_in == False %}
 <!-- Google Login -->
     <div id="signinButton">
       <span class="g-signin"
@@ -114,6 +115,13 @@
   </fb:login-button>
 
 </button>
+
+{% else %}
+<div class="logged_message">
+  You are already logged in!
+</div>
+
+{% endif %}
 
 <!-- End Facebook login-->
 
