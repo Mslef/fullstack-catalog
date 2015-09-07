@@ -3,3 +3,4 @@ catalog.db-journal
 db_setup.pyc
 temp.py
 catalog_backup.db
+.vagrant/
