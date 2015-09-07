@@ -60,12 +60,12 @@ def JSONShowItem(category_id, item_id):
     return jsonify(Item=[item.serialize])
 
 #User methods
-def createUser(login_session):
-    newUser = User(name = login_session['username'], email = login_session['email'], picture = login_session['picture'])
+def createUser(login_session, admin):
+    newUser = User(name = login_session['username'], email = login_session['email'], picture = login_session['picture'], admin = admin)
     session.add(newUser)
     session.commit
     user = session.query(User).filter_by(email=login_session['email']).one()
-    return user.id
+    return user.email
 
 def getUserInfo(user_id):
     '''user=session.query(User).filter_by(id = user_id).one()
@@ -101,10 +101,8 @@ def editCategory(category_id):
 
     if 'username' not in login_session:
         return redirect('/login')
-    if login_session["email"] != creator.email:
-        flash("You don't have the permission to edit this category")
-        return redirect ("/categories")
-    else:
+
+    if login_session["email"] == creator.email or login_session["admin"] == True:
         category = session.query(Category).filter_by(id=category_id).one()
         if request.method == 'POST':
             category.name = request.form['name']
@@ -113,16 +111,17 @@ def editCategory(category_id):
             return redirect('/categories')
         else :
             return render_template('editcategory.html', category = category)
+    else:
+        flash("You don't have the permission to edit this category")
+        return redirect ("/categories")
+
 
 @app.route('/categories/<int:category_id>/delete/', methods=['GET', 'POST'])
 def deleteCategory(category_id):
     if 'username' not in login_session:
         return redirect('/login')
 
-    if login_session["email"] != creator.email:
-        flash("You don't have the permission to delete this category")
-        return redirect ("/categories")
-    else:
+    if login_session["email"] == creator.email or login_session["admin"] == True:
         category = session.query(Category).filter_by(id=category_id).one()
         if request.method == 'POST':
             session.delete(category)
@@ -132,6 +131,10 @@ def deleteCategory(category_id):
 
         else:
             return render_template('deletecategory.html', category = category)
+
+    else:
+        flash("You don't have the permission to delete this category")
+        return redirect ("/categories")
 
 
 #Items
@@ -202,10 +205,7 @@ def showLogin():
     login_session['state'] = state
     return render_template('login.html', STATE=state)
 
-@app.route('/disconnect')
-def disconnect():
-    pass
-
+#helper functions
 def return_response(response_string, response_code):
     '''Function to return a response following a request'''
     response = make_response(json.dumps(response_string), response_code)
@@ -224,7 +224,7 @@ def successfull_login(login_session):
     # Check if user exists
     user_id = getUserID(login_session['email'])
     if not user_id:
-        user_id = createUser(login_session)
+        user_id = createUser(login_session, False)
     login_session['user_id'] = user_id
 
     # Output a welcome message
@@ -234,6 +234,7 @@ def successfull_login(login_session):
     return output
 
 
+#Oauth connections
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     # Compare the state in the url returned from the site
@@ -252,11 +253,12 @@ def gconnect():
         return return_response('Failed to upgrade authorization code.', 401)
 
     # Check that the access token is valid
+    access_token = credentials.access_token
     result = get_user_data('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s', credentials.access_token)
 
     # Abort if error in the access token info
     if result.get('error') is not None:
-        response = return_response(result.get('error'), 501)
+        response = return_response(result.get('error'), 500)
 
     # Validate user ID and client ID
     gplus_id = credentials.id_token['sub']
@@ -275,46 +277,23 @@ def gconnect():
         return "You are already logged in as %s!" %login_session['username']
 
     #Store the access token in the session for later use
-    login_session['access_token'] = credentials.access_token
+    login_session['access_token'] = access_token
     login_session['gplus_id'] = gplus_id
-    login_session['username'] = data["name"]
-    login_session['email'] = data["email"]
 
     #Get user info
     userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
     params = {'access_token': credentials.access_token, 'alt': 'json'}
     answer = requests.get(userinfo_url, params = params)
 
-    data = json.loads(answer.text)
+    data = answer.json()
+
     login_session['picture'] = data["picture"]
+    login_session['username'] = data["name"]
+    login_session['email'] = data["email"]
+    login_session['provider'] = 'google'
 
     #Output a welcome message
     return successfull_login(login_session)
-
-@app.route("/gdisconnect")
-def gdisconnect():
-    #Check if user is connected
-    access_token = login_session.get("access_token")
-    if access_token is None:
-        return return_response('Current user not connected.', 401)
-
-    #Execute HTTP GET request to revoque current token
-    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
-    h = httplib2.Http()
-    result = h.request(url, 'GET')[0]
-
-    if result['status'] == 200:
-        #Reset the user's session.
-        del login_session['access_token']
-        del login_session['gplus_id']
-        del login_session['username']
-        del login_session['email']
-        del login_session['picture']
-
-        return return_response('Successfully disconnected.', 200)
-    else:
-        print access_token
-        return return_response('Failed to revoke the token for given user.', 400)
 
 @app.route('/fbconnect', methods=['POST'])
 def fbconnect():
@@ -356,6 +335,21 @@ def fbconnect():
 
     return successfull_login(login_session)
 
+@app.route('/gdisconnect')
+def gdisconnect():
+    #Check if user is connected
+    access_token = login_session.get("access_token")
+    if access_token is None:
+        return return_response('Current user not connected.', 401)
+
+    #revoke current token
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
+    h = httplib2.Http()
+    result = h.request(url, 'GET')[0]
+    if result['status'] != '200':
+        # For whatever reason, the given token was invalid.
+        return return_response('Failed to revoke the token for given user.', 400)
+
 
 @app.route('/fbdisconnect')
 def fbdisconnect():
@@ -367,8 +361,31 @@ def fbdisconnect():
     result = h.request(url, 'DELETE')[1]
     return "you have been logged out"
 
+# Disconnect based on provider
+@app.route('/disconnect')
+def disconnect():
+    if 'provider' in login_session:
+        if login_session['provider'] == 'google':
+            gdisconnect()
+            del login_session['gplus_id']
+            del login_session['credentials']
+        if login_session['provider'] == 'facebook':
+            fbdisconnect()
+            del login_session['facebook_id']
+        del login_session['username']
+        del login_session['email']
+        del login_session['picture']
+        del login_session['user_id']
+        del login_session['provider']
+        flash("You have successfully been logged out.")
+        return redirect(url_for('showRestaurants'))
+    else:
+        flash("You were not logged in")
+        return redirect(url_for('showRestaurants'))
+
+
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
-    app.run(host = '0.0.0.0', port = 5000)
+    app.run(host = '0.0.0.0', port = 5001)

@@ -2,7 +2,7 @@
 
 import sys
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Unicode
+from sqlalchemy import Column, ForeignKey, Integer, String, Unicode, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
@@ -13,19 +13,9 @@ class User(Base):
     '''User data structure'''
     __tablename__ = 'user'
     name = Column (String(250), nullable = False)
-    email = Column (String(250), nullable = False)
-    picture = Column (String(250), nullable = False)
-    id = Column(Integer, primary_key = True)
-
-    @property
-    def serialize(self):
-        '''Returns object data in serializeable format '''
-        return {
-            'name':self.name,
-            'id':self.id,
-            'email':self.email,
-            'picture':self.picture
-        }
+    email = Column (String(250), primary_key = True, nullable = False)
+    picture = Column (String(250))
+    admin = Column(Boolean, nullable = False)
 
 class Category(Base):
     '''Category data structure'''
@@ -33,7 +23,7 @@ class Category(Base):
 
     name = Column (String(80), nullable = False)
     id = Column(Integer, primary_key = True)
-    user_id = Column(Integer, ForeignKey('user.id'))
+    user_id = Column(String(250), ForeignKey('user.email'))
     user = relationship(User)
 
     @property
@@ -54,7 +44,7 @@ class Item(Base):
     image_url = Column(String(250))
     category_id = Column(Integer, ForeignKey('category.id'))
     category = relationship(Category)
-    user_id = Column(Integer, ForeignKey('user.id'))
+    user_id = Column(String(250), ForeignKey('user.email'))
     user = relationship(User)
 
     @property

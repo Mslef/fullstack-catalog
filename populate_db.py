@@ -3,7 +3,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from db_setup import Category, Base, Item
+from db_setup import Category, Base, Item, User
 
 engine = create_engine('sqlite:///catalog.db')
 Base.metadata.bind = engine
@@ -23,8 +23,8 @@ def createItem(name, description, image_url, category):
     session.add(item)
     session.commit()
 
-def createUser(name):
-    user = User(name = name)
+def createAdmin(name, email):
+    user = User(name = name, email = email, admin = True)
     session.add(user)
     session.commit()
 

@@ -1,2 +1,5 @@
 catalog.db-journal
 .project.py.swp
+db_setup.pyc
+temp.py
+catalog_backup.db
