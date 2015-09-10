@@ -17,6 +17,7 @@ class User(Base):
     picture = Column (String(250))
     admin = Column(Boolean, nullable = False)
 
+
 class Category(Base):
     '''Category data structure'''
     __tablename__ = 'category'
@@ -33,6 +34,7 @@ class Category(Base):
             'name':self.name,
             'id':self.id
         }
+
 
 class Item(Base):
     '''Item data structure'''
@@ -57,6 +59,7 @@ class Item(Base):
             'image_url': self.image_url
         }
 
-engine = create_engine('sqlite:///catalog.db')
+#engine = create_engine('sqlite:///catalog.db')
+engine = create_engine("postgresql:///catalog.db")
 
 Base.metadata.create_all(engine)
